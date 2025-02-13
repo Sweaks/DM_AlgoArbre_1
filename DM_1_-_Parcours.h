@@ -21,7 +21,7 @@ typedef struct file {
 Cellule * alloue_cellule(Noeud * n);
 void insere_en_tete(Liste * l, Cellule * c);
 Cellule * extrait_tete(Liste * l);
-void affiche_liste(Liste l);
+void affiche_liste_renversee(Liste l);
 
 File initialisation();
 int est_vide(File f);
@@ -30,7 +30,7 @@ int defiler(File f, Noeud ** sortant);
 
 Noeud * alloue_noeud(int val, Arbre fg, Arbre fd);
 int construit_complet(int h, Arbre * a);
-int construit_filiforme(int h, Arbre * a, int graine);
+int construit_filiforme_aleatoire(int h, Arbre * a, int graine);
 
 int insere_niveau(Arbre a, int niv, Liste * lst);
 int parcours_largeur_naif(Arbre a, Liste * lst);
