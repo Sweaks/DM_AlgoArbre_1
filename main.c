@@ -90,3 +90,4 @@ Noeud * alloue_noeud(int val, Arbre fg, Arbre fd){
     noeud->fd = fd;
     return &noeud;
 }
+
