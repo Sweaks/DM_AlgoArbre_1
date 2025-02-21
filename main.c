@@ -25,9 +25,12 @@ Cellule * alloue_cellule(Noeud * n){
 }
 
 void insere_en_tete(Liste * lst, Cellule * cell){
-    if(!(*lst)) *lst = cell;
-    cell->suivant = *lst;
-    *lst = cell;
+    if(!(*lst)) {
+        *lst = cell;
+    } else {
+        cell->suivant = *lst;
+        *lst = cell;
+    }
 }
 
 Cellule * extrait_tete(Liste *lst){
@@ -76,10 +79,11 @@ int enfiler(File f, Noeud * n){
     if(est_vide(f) > 0){ // Si la file est vide
         f->debut = new_cell;
         f->fin = new_cell;
-    }else{
-        insere_en_tete(&(f)->debut, new_cell);
-        f->taille++;
+    } else {
+        f->fin->suivant = new_cell;
+        f->fin = new_cell;
     }
+    f->taille++;
     return 1;
 }
 
@@ -158,6 +162,49 @@ int construit_complet(int h, Arbre *a) {
 }
 
 
+int construit_filiforme_aleatoire(int h, Arbre * a, int graine) {
+    if (h < 0) return 0;
+
+    srand(graine);
+
+    *a = (Noeud*)malloc(sizeof(Noeud));
+    if (*a == NULL) return 0;
+
+    (*a)->valeur = 1;
+    (*a)->fg = (*a)->fd = NULL;
+
+    Noeud* parent = *a;
+
+    for (int i = 2; i <= h + 1; i++) {
+        Noeud* enfant = (Noeud*)malloc(sizeof(Noeud));
+
+        if (enfant == NULL) {
+            // Libérer toute la mémoire allouée en cas d'échec (à voir si on met pas juste free(*a))
+            while (*a) {
+                Noeud* temp = *a;
+                *a = (*a)->fg ? (*a)->fg : (*a)->fd;
+                free(temp);
+            }
+            return 0;
+        }
+
+        enfant->valeur = i;
+        enfant->fg = enfant->fd = NULL;
+
+        if (rand() % 2) {
+            parent->fg = enfant;
+        } 
+
+        else {
+            parent->fd = enfant;
+        }
+
+        parent = enfant;
+    }
+
+    return 1;
+}
+
 
 int insere_niveau(Arbre a, int niv, Liste * lst){
     if(!a) return 0;
@@ -180,15 +227,73 @@ int hauteur(Arbre a){
 }
 
 int parcours_largeur_naif(Arbre a, Liste * lst){
-    if(!a) return 0;
-    int niv = hauteur(a);
-    insere_niveau(a, niv, lst);
+    int h = hauteur(a);
+    for (int niv = 0; niv < h; niv++) {
+        insere_niveau(a, niv, lst);
+    }
     return 1;
 }
+
+
+
+int parcours_largeur(Arbre a, Liste * lst) {
+    File f = initialisation();
+
+    enfiler(f, a);
+
+    while(f->taille > 0) {
+        Noeud* n;
+        defiler(f, &n);
+
+        if (n) {
+            if (n->fg) {
+                enfiler(f, n->fg);
+            }
+
+            if (n->fd) {
+                enfiler(f, n->fd);
+            }
+
+            Cellule * cell = alloue_cellule(n);
+            insere_en_tete(lst, cell);
+
+        }
+    }
+    return 1;
+}
+
+
+int parcours_largeur_V2(Arbre a, Liste * lst, int * nb_visite) {
+    File f = initialisation();
+
+    enfiler(f, a);
+
+    while(f->taille > 0) {
+        Noeud* n;
+        defiler(f, &n);
+
+        if (n) {
+            if (n->fg) {
+                enfiler(f, n->fg);
+            }
+
+            if (n->fd) {
+                enfiler(f, n->fd);
+            }
+
+            Cellule * cell = alloue_cellule(n);
+            insere_en_tete(lst, cell);
+            (*nb_visite)++;
+        }
+    }
+    return 1;
+}
+
  
 int main() {
     Arbre arbre = NULL;
     Liste lst = NULL;
+    int nb_visites = 0;
 
     // Construire un arbre complet de hauteur 2
     if (construit_complet(2, &arbre)) {
@@ -205,6 +310,28 @@ int main() {
     } else {
         printf("Échec du parcours en largeur.\n");
     }
+
+
+    // test construit filiforme
+    Arbre arbre2 = NULL;
+    Liste lst2 = NULL;
+
+    if (construit_filiforme_aleatoire(25, &arbre2, 42)) {
+        printf("Arbre construit avec succès.\n");
+    } else {
+        printf("Échec de la construction de l'arbre.\n");
+        return 1;
+    }
+
+    // afficher l'arbre construit
+    //parcours_largeur_naif(arbre2, &lst2);
+    //affiche_liste(lst2);
+
+    // test parcours largeur
+    printf("Parcours en largeur de l'arbre 2:\n");
+    parcours_largeur_V2(arbre2, &lst2, &nb_visites);
+    affiche_liste(lst2);
+    printf("Nombre de noeuds visités: %d\n", nb_visites);
 
     return 0;
 }
