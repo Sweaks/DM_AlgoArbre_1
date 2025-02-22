@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+
 
 typedef struct _noeud {
     int valeur;
@@ -262,6 +265,29 @@ int parcours_largeur(Arbre a, Liste * lst) {
     return 1;
 }
 
+int insere_niveau_V2(Arbre a, int niv, Liste * lst, int * nb_visite){
+    if(!a) return 0;
+    if(niv == 0){ // Si on est arrivé au niveau voulu
+        Cellule * cell = alloue_cellule(a);
+        insere_en_tete(lst, cell);
+        return 1;
+    }
+    insere_niveau_V2(a->fg, niv-1, lst, nb_visite);
+    insere_niveau_V2(a->fd,niv-1, lst, nb_visite);
+    (*nb_visite)++;
+
+    return 1;
+
+}
+
+int parcours_largeur_naif_V2(Arbre a, Liste *lst, int *nb_visite){
+    int h = hauteur(a);
+    for (int niv = 0; niv < h; niv++) {
+        insere_niveau_V2(a, niv, lst, nb_visite);
+    }
+    return 1;
+}
+
 
 int parcours_largeur_V2(Arbre a, Liste * lst, int * nb_visite) {
     File f = initialisation();
@@ -289,14 +315,20 @@ int parcours_largeur_V2(Arbre a, Liste * lst, int * nb_visite) {
     return 1;
 }
 
+
+
  
 int main() {
     Arbre arbre = NULL;
     Liste lst = NULL;
     int nb_visites = 0;
+    int nb_visites2 = 0;
+    int nb_visites3 = 0;
+    int nb_visites4 = 0;
+    
 
     // Construire un arbre complet de hauteur 2
-    if (construit_complet(2, &arbre)) {
+    if (construit_complet(4, &arbre)) {
         printf("Arbre construit avec succès.\n");
     } else {
         printf("Échec de la construction de l'arbre.\n");
@@ -306,7 +338,7 @@ int main() {
     // Parcourir l'arbre en largeur et stocker les valeurs dans la liste
     if (parcours_largeur_naif(arbre, &lst)) {
         printf("Parcours en largeur réussi.\n");
-        affiche_liste(lst);
+        //affiche_liste(lst);
     } else {
         printf("Échec du parcours en largeur.\n");
     }
@@ -315,23 +347,39 @@ int main() {
     // test construit filiforme
     Arbre arbre2 = NULL;
     Liste lst2 = NULL;
+    Liste lst3 = NULL;
 
-    if (construit_filiforme_aleatoire(25, &arbre2, 42)) {
+    if (construit_filiforme_aleatoire(4, &arbre2, 42)) {
         printf("Arbre construit avec succès.\n");
     } else {
         printf("Échec de la construction de l'arbre.\n");
         return 1;
     }
-
     // afficher l'arbre construit
     //parcours_largeur_naif(arbre2, &lst2);
     //affiche_liste(lst2);
 
-    // test parcours largeur
+    
+    // test parcours largeur naif V2 avec arbre de recherche complet
+    //et test parcours largeur V2 avec arbre de recherche filiforme aléatoire
+    printf("Parcours en largeur de l'arbre 1:\n");
+    parcours_largeur_naif_V2(arbre, &lst2, &nb_visites);
+    parcours_largeur_V2(arbre, &lst3, &nb_visites2);
+    //affiche_liste(lst3);
+    printf("Nombre de noeuds visités (parcours_largeur_naif_V2): %d\n", nb_visites);
+    printf("Nombre de noeuds visités (parcours_largeur_V2): %d\n", nb_visites2);
+
+    Liste lst4 = NULL;
+    Liste lst5 = NULL;
+
+    // test parcours largeur naif V2 avec arbre de recherche filiforme aléatoire
+    //et test parcours largeur (naif) V2 avec arbre de recherche filiforme aléatoire
     printf("Parcours en largeur de l'arbre 2:\n");
-    parcours_largeur_V2(arbre2, &lst2, &nb_visites);
-    affiche_liste(lst2);
-    printf("Nombre de noeuds visités: %d\n", nb_visites);
+    parcours_largeur_naif_V2(arbre2, &lst4, &nb_visites3);
+    parcours_largeur_V2(arbre2, &lst5, &nb_visites4);
+    //affiche_liste(lst3);
+    printf("Nombre de noeuds visités (parcours_largeur_naif_V2): %d\n", nb_visites3);
+    printf("Nombre de noeuds visités (parcours_largeur_V2): %d\n", nb_visites4);
 
     return 0;
 }
