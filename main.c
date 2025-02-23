@@ -235,7 +235,7 @@ int insere_niveau(Arbre a, int niv, Liste * lst){
     if(niv == 0){ // Si on est arrivé au niveau voulu
         Cellule * cell = alloue_cellule(a);
         if(!cell) return 0; //allocation ratée
-        insere_en_tete(lst, cell);
+        insere_en_queue(lst, cell);
         return 1;
     }
     insere_niveau(a->fg, niv-1, lst);
@@ -304,6 +304,7 @@ int parcours_largeur_naif_V2(Arbre a, Liste *lst, int *nb_visite){
     A corriger
     */
     int h = hauteur(a);
+    *nb_visite = 1;
     int nb_noeud;
     for (int niv = 0; niv < h; niv++) {
         insere_niveau_V2(a, niv, lst, nb_visite);
