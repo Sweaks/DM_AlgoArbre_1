@@ -33,6 +33,18 @@ void insere_en_tete(Liste * lst, Cellule * cell){
     }
 }
 
+void insere_en_queue(Liste * lst, Cellule * cell){
+    if(!(*lst)) {
+        *lst = cell;
+    } else {
+        Liste temp = *lst;
+        while(temp->suivant) {
+            temp = temp->suivant;
+        }
+        temp->suivant = cell;
+    }
+}
+
 Cellule *extrait_tete(Liste *lst){
     if(!(*lst)) return NULL;   
 
@@ -268,7 +280,7 @@ int parcours_largeur(Arbre a, Liste * lst) {
             }
 
             Cellule * cell = alloue_cellule(n);
-            insere_en_tete(lst, cell);
+            insere_en_queue(lst, cell);
 
         }
     }
@@ -320,7 +332,7 @@ int parcours_largeur_V2(Arbre a, Liste * lst, int * nb_visite) {
             }
 
             Cellule * cell = alloue_cellule(n);
-            insere_en_tete(lst, cell);
+            insere_en_queue(lst, cell);
             (*nb_visite)++;
         }
     }
@@ -374,7 +386,8 @@ int main() {
     printf("Parcours en largeur de l'arbre 1:\n");
     parcours_largeur_naif_V2(arbre, &lst2, &nb_visites);
     parcours_largeur_V2(arbre, &lst3, &nb_visites2);
-    //affiche_liste(lst3);
+    affiche_liste(lst2);
+    affiche_liste(lst3);
     printf("Nombre de noeuds visités (parcours_largeur_naif_V2): %d\n", nb_visites);
     printf("Nombre de noeuds visités (parcours_largeur_V2): %d\n", nb_visites2);
 
@@ -386,7 +399,8 @@ int main() {
     printf("Parcours en largeur de l'arbre 2:\n");
     parcours_largeur_naif_V2(arbre2, &lst4, &nb_visites3);
     parcours_largeur_V2(arbre2, &lst5, &nb_visites4);
-    //affiche_liste(lst3);
+    affiche_liste(lst4);
+    affiche_liste(lst5);
     printf("Nombre de noeuds visités (parcours_largeur_naif_V2): %d\n", nb_visites3);
     printf("Nombre de noeuds visités (parcours_largeur_V2): %d\n", nb_visites4);
 
