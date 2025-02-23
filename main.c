@@ -1,8 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-
 
 typedef struct _noeud {
     int valeur;
@@ -36,10 +33,13 @@ void insere_en_tete(Liste * lst, Cellule * cell){
     }
 }
 
-Cellule * extrait_tete(Liste *lst){
-    if(!(*lst)) return NULL;
+Cellule *extrait_tete(Liste *lst){
+    if(!(*lst)) return NULL;   
+
     Cellule * cellule_extraite = *lst;
     *lst = (*lst)->suivant;
+    cellule_extraite->suivant = NULL;
+
     return cellule_extraite;
 }
 
@@ -96,9 +96,18 @@ int defiler(File f, Noeud ** sortant){
     
     if(est_vide(f) > 0) return 0; // Si la file est vide
     Cellule * cellule_extraite = extrait_tete(&(f)->debut);
+    if(!cellule_extraite) { //Si rien n'extrait
+        *sortant = NULL;
+        return 0;
+    }
     *sortant = cellule_extraite->noeud;
     free(cellule_extraite);
     f->taille--;
+
+    if (f->debut == NULL) {  //Si f->debut est vide après suppression 
+        f->fin = NULL; // On doit s'assurer que f->fin soit NULL aussi
+    }
+
     return 1;
 }
 
@@ -210,16 +219,17 @@ int construit_filiforme_aleatoire(int h, Arbre * a, int graine) {
 
 
 int insere_niveau(Arbre a, int niv, Liste * lst){
-    if(!a) return 0;
+    if(!a) return 1; //Si l'arbre est vide , il y a aucun element dans la liste
     if(niv == 0){ // Si on est arrivé au niveau voulu
         Cellule * cell = alloue_cellule(a);
+        if(!cell) return 0; //allocation ratée
         insere_en_tete(lst, cell);
         return 1;
     }
     insere_niveau(a->fg, niv-1, lst);
     insere_niveau(a->fd,niv-1, lst);
+   
     return 1;
-
 }
 
 int hauteur(Arbre a){
@@ -266,26 +276,28 @@ int parcours_largeur(Arbre a, Liste * lst) {
 }
 
 int insere_niveau_V2(Arbre a, int niv, Liste * lst, int * nb_visite){
-    if(!a) return 0;
+    if(!a) return 1; //Si l'arbre est vide , il y a aucun element dans la liste
     if(niv == 0){ // Si on est arrivé au niveau voulu
         Cellule * cell = alloue_cellule(a);
         insere_en_tete(lst, cell);
-        return 1;
+        (*nb_visite)++; //on incremente nb_visite apres chaque insertion dans lst
     }
-    insere_niveau_V2(a->fg, niv-1, lst, nb_visite);
-    insere_niveau_V2(a->fd,niv-1, lst, nb_visite);
-    (*nb_visite)++;
-
-    return 1;
+    return insere_niveau_V2(a->fg, niv-1, lst, nb_visite) + insere_niveau_V2(a->fd,niv-1, lst, nb_visite);
 
 }
 
 int parcours_largeur_naif_V2(Arbre a, Liste *lst, int *nb_visite){
+    /*
+    test/Test_Parcours.c:67:test_parcours_largeur_naif_V2:FAIL: Expected 1 Was 3
+    A corriger
+    */
     int h = hauteur(a);
+    int nb_noeud;
     for (int niv = 0; niv < h; niv++) {
         insere_niveau_V2(a, niv, lst, nb_visite);
     }
-    return 1;
+    nb_noeud = *nb_visite;
+    return nb_noeud;
 }
 
 
@@ -314,9 +326,6 @@ int parcours_largeur_V2(Arbre a, Liste * lst, int * nb_visite) {
     }
     return 1;
 }
-
-
-
  
 int main() {
     Arbre arbre = NULL;
